@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка на возврат</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a0033, #00331a);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 10px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 0, 0.1);
+            filter: blur(10px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        #project-title {
+            text-align: center;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #00ffff;
+            font-size: 4em;
+            margin-bottom: 10px;
+            animation: glitch-intense 0.5s infinite;
+            font-family: 'Orbitron', sans-serif;
+        }
+        h2 {
+            text-align: center;
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+            font-size: 1.5em;
+            font-weight: 300;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #00ffff;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: inherit;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .note {
+            font-size: 0.8em;
+            color: #ff0000;
+            margin-top: 2px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #ff00ff;
+            border: none;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            text-shadow: 0 0 2px #000;
+        }
+        button:hover {
+            box-shadow: 0 0 10px #ff00ff;
+        }
+        #admin-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: #ff00ff;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 5px #ff00ff;
+            text-shadow: 0 0 3px #00ffff;
+            animation: glitch 2s infinite;
+        }
+        #popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            color: #00ff00;
+            text-align: center;
+            box-shadow: 0 0 20px #00ff00;
+            display: none;
+            border-radius: 10px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+        #warning-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        #warning-content {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 1px solid #ff00ff;
+            border-radius: 10px;
+            text-align: center;
+            color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+            max-width: 80%;
+        }
+        #warning-content button {
+            background: #00ff00;
+            color: #000;
+            margin-top: 10px;
+        }
+        #admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 10px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        #admin-login {
+            max-width: 100%;
+            width: 100%;
+            margin: 50px auto 0;
+            padding: 15px;
+            border: 1px solid #ff00ff;
+            background: #1a1a1a;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        #admin-content {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        .application {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #00ffff;
+            background: #0a0a0a;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        @keyframes glitch-intense {
+            0% { transform: translate(0); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+            10% { transform: translate(-5px, 5px); clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%); }
+            20% { transform: translate(5px, -5px); clip-path: polygon(0 0, 100% 0, 100% 20%, 0 20%); }
+            30% { transform: translate(-3px, 3px); clip-path: polygon(0 10%, 100% 10%, 100% 90%, 0 90%); }
+            40% { transform: translate(3px, -3px); clip-path: polygon(0 30%, 100% 30%, 100% 70%, 0 70%); }
+            50% { transform: translate(0); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+            100% { transform: translate(0); }
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 10px;
+            }
+            #project-title {
+                font-size: 3em;
+            }
+            h2 {
+                font-size: 1.2em;
+            }
+            input, textarea, select {
+                font-size: 0.9em;
+            }
+            button {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="project-title">PXAXBET</h1>
+        <h2>Заявка на возврат средств</h2>
+        <form id="refund-form">
+            <label for="instagram-nick">Ник в Instagram</label>
+            <input type="text" id="instagram-nick" required disabled>
+            <div class="note">Компания Meta запрещена на территории РФ</div>
+
+            <label for="phone">Номер телефона (ваш)</label>
+            <input type="tel" id="phone" required disabled>
+
+            <label for="target-instagram">Ник в Instagram аккаунта, на который переводили</label>
+            <input type="text" id="target-instagram" required disabled>
+            <div class="note">Социальная сеть запрещена на территории РФ</div>
+
+            <label for="telegram-username">Юзернейм Telegram (ваш)</label>
+            <input type="text" id="telegram-username" required disabled>
+
+            <label for="amount">Сумма на возврат</label>
+            <input type="number" id="amount" required min="1" disabled>
+
+            <label for="receipt">Загрузить чек</label>
+            <input type="file" id="receipt" accept="image/*,application/pdf" disabled>
+
+            <label for="transfer-method">Куда перевести деньги</label>
+            <select id="transfer-method" required disabled>
+                <option value="">Выберите метод</option>
+                <option value="sbp">СБП</option>
+                <option value="card">Номер карты</option>
+            </select>
+            <input type="text" id="transfer-details" placeholder="Введите детали (номер телефона для СБП или номер карты)" required style="display: none;" disabled>
+
+            <label for="comment">Комментарий (до 300 символов)</label>
+            <textarea id="comment" maxlength="300" disabled></textarea>
+
+            <button type="submit" disabled>Отправить заявку</button>
+        </form>
+
+        <button id="soon-btn" disabled>скоро🤫</button>
+    </div>
+
+    <div id="popup">
+        <p>Ваша заявка принята. После рассмотрения заявки средства будут зачислены автоматически.</p>
+    </div>
+
+    <button id="admin-btn" onclick="showAdminLogin()">X</button>
+
+    <div id="admin-panel">
+        <div id="admin-login">
+            <h2>Вход в админ-панель</h2>
+            <input type="text" id="admin-username" placeholder="Логин">
+            <input type="password" id="admin-password" placeholder="Пароль">
+            <button onclick="loginAdmin()">Войти</button>
+            <button onclick="closeAdminPanel()" style="background: #ff0000; margin-top: 10px;">Закрыть</button>
+        </div>
+        <div id="admin-content" style="display: none;">
+            <h2>Заявки</h2>
+            <div id="applications-list"></div>
+            <button onclick="logoutAdmin()">Выйти</button>
+        </div>
+    </div>
+
+    <div id="warning-popup">
+        <div id="warning-content">
+            <p>Предупреждение: Технические работы в процессе. Форма недоступна для заполнения.</p>
+            <button onclick="closeWarningPopup()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_USERNAME = '09pX90Ax';
+        const ADMIN_PASSWORD = 'securepass123';
+
+        if (!localStorage.getItem('applications')) {
+            localStorage.setItem('applications', JSON.stringify([]));
+        }
+
+        const form = document.getElementById('refund-form');
+        const transferMethod = document.getElementById('transfer-method');
+        const transferDetails = document.getElementById('transfer-details');
+        const popup = document.getElementById('popup');
+
+        transferMethod.addEventListener('change', () => {
+            transferDetails.style.display = 'block';
+            if (transferMethod.value === 'sbp') {
+                transferDetails.placeholder = 'Номер телефона для СБП';
+            } else if (transferMethod.value === 'card') {
+                transferDetails.placeholder = 'Номер карты';
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
+
+        function showAdminLogin() {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('admin-login').style.display = 'block';
+            document.getElementById('admin-content').style.display = 'none';
+        }
+
+        function loginAdmin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                loadApplications();
+            } else {
+                alert('Неверный логин или пароль');
+            }
+        }
+
+        function loadApplications() {
+            const list = document.getElementById('applications-list');
+            list.innerHTML = '';
+            const apps = JSON.parse(localStorage.getItem('applications')) || [];
+            apps.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            apps.forEach((app, index) => {
+                const div = document.createElement('div');
+                div.classList.add('application');
+                div.innerHTML = `
+                    <p><strong>Заявка #${index + 1}</strong> (${app.timestamp})</p>
+                    <p>Instagram: ${app.instagramNick}</p>
+                    <p>Телефон: ${app.phone}</p>
+                    <p>Целевой Instagram: ${app.targetInstagram}</p>
+                    <p>Telegram: ${app.telegramUsername}</p>
+                    <p>Сумма: ${app.amount}</p>
+                    <p>Чек: ${app.receipt}</p>
+                    <p>Перевод: ${app.transferMethod} - ${app.transferDetails}</p>
+                    <p>Комментарий: ${app.comment}</p>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function logoutAdmin() {
+            closeAdminPanel();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').style.display = 'none';
+        }
+
+        function closeWarningPopup() {
+            document.getElementById('warning-popup').style.display = 'none';
+        }
+
+        window.onload = () => {
+            document.getElementById('warning-popup').style.display = 'flex';
+        };
+
+        const title = document.getElementById('project-title');
+        let isFirst = true;
+        setInterval(() => {
+            title.innerText = isFirst ? 'PXAXBET' : 'PXAXBYTE';
+            isFirst = !isFirst;
+        }, 500);
+    </script>
+</body>
+</html>
