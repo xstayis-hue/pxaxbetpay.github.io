@@ -82,6 +82,11 @@
             color: #ff0000;
             margin-top: 2px;
         }
+        .explanation {
+            font-size: 0.8em;
+            color: #00ffff;
+            margin-top: 5px;
+        }
         button {
             width: 100%;
             padding: 10px;
@@ -242,37 +247,46 @@
         <h2>Заявка на возврат средств</h2>
         <form id="refund-form">
             <label for="instagram-nick">Ник в Instagram</label>
-            <input type="text" id="instagram-nick" required disabled>
+            <input type="text" id="instagram-nick" disabled>
             <div class="note">Компания Meta запрещена на территории РФ</div>
 
             <label for="phone">Номер телефона (ваш)</label>
-            <input type="tel" id="phone" required disabled>
+            <input type="tel" id="phone" disabled>
 
             <label for="target-instagram">Ник в Instagram аккаунта, на который переводили</label>
-            <input type="text" id="target-instagram" required disabled>
+            <input type="text" id="target-instagram" disabled>
             <div class="note">Социальная сеть запрещена на территории РФ</div>
 
             <label for="telegram-username">Юзернейм Telegram (ваш)</label>
-            <input type="text" id="telegram-username" required disabled>
+            <input type="text" id="telegram-username" disabled>
 
             <label for="amount">Сумма на возврат</label>
-            <input type="number" id="amount" required min="1" disabled>
+            <input type="number" id="amount" min="1" disabled>
 
             <label for="receipt">Загрузить чек</label>
             <input type="file" id="receipt" accept="image/*,application/pdf" disabled>
 
             <label for="transfer-method">Куда перевести деньги</label>
-            <select id="transfer-method" required disabled>
+            <select id="transfer-method" required>
                 <option value="">Выберите метод</option>
                 <option value="sbp">СБП</option>
                 <option value="card">Номер карты</option>
+                <option value="crypto">Криптовалюта</option>
             </select>
-            <input type="text" id="transfer-details" placeholder="Введите детали (номер телефона для СБП или номер карты)" required style="display: none;" disabled>
+            <input type="text" id="transfer-details" placeholder="Введите детали (номер телефона для СБП или номер карты)" required style="display: none;">
+
+            <label for="withdrawal-type">Вывод частями* с процентами или вывод единым платежом?</label>
+            <select id="withdrawal-type" required>
+                <option value="">Выберите вариант</option>
+                <option value="partial">Вывод частями с процентами</option>
+                <option value="single">Вывод единым платежом</option>
+            </select>
+            <div class="explanation">*Например, ваша сумма вывода 20.000р, при выводе частями будет 5-6 платежей по 7.000р.</div>
 
             <label for="comment">Комментарий (до 300 символов)</label>
             <textarea id="comment" maxlength="300" disabled></textarea>
 
-            <button type="submit" disabled>Отправить заявку</button>
+            <button type="submit">Отправить заявку</button>
         </form>
 
         <button id="soon-btn" disabled>скоро🤫</button>
@@ -325,11 +339,38 @@
                 transferDetails.placeholder = 'Номер телефона для СБП';
             } else if (transferMethod.value === 'card') {
                 transferDetails.placeholder = 'Номер карты';
+            } else if (transferMethod.value === 'crypto') {
+                transferDetails.placeholder = 'Адрес кошелька (BTC, ETH и т.д.)';
             }
         });
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
+
+            const data = {
+                instagramNick: document.getElementById('instagram-nick').value,
+                phone: document.getElementById('phone').value,
+                targetInstagram: document.getElementById('target-instagram').value,
+                telegramUsername: document.getElementById('telegram-username').value,
+                amount: document.getElementById('amount').value,
+                receipt: document.getElementById('receipt').files[0] ? 'Чек загружен' : 'Нет чека',
+                transferMethod: transferMethod.value,
+                transferDetails: transferDetails.value,
+                withdrawalType: document.getElementById('withdrawal-type').value,
+                comment: document.getElementById('comment').value,
+                timestamp: new Date().toISOString()
+            };
+
+            let apps = JSON.parse(localStorage.getItem('applications'));
+            apps.push(data);
+            localStorage.setItem('applications', JSON.stringify(apps));
+
+            popup.style.display = 'block';
+            setTimeout(() => {
+                popup.style.display = 'none';
+                form.reset();
+                transferDetails.style.display = 'none';
+            }, 3000);
         });
 
         function showAdminLogin() {
@@ -368,6 +409,7 @@
                     <p>Сумма: ${app.amount}</p>
                     <p>Чек: ${app.receipt}</p>
                     <p>Перевод: ${app.transferMethod} - ${app.transferDetails}</p>
+                    <p>Тип вывода: ${app.withdrawalType === 'partial' ? 'Частями с процентами' : 'Единым платежом'}</p>
                     <p>Комментарий: ${app.comment}</p>
                 `;
                 list.appendChild(div);
