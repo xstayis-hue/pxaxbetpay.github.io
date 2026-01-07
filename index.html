@@ -286,7 +286,7 @@
             <label for="comment">Комментарий (до 300 символов)</label>
             <textarea id="comment" maxlength="300" disabled></textarea>
 
-            <button type="submit">Отправить заявку</button>
+            <button type="submit" id="submit-btn" disabled>Отправить заявку</button>
         </form>
 
         <button id="soon-btn" disabled>скоро🤫</button>
@@ -331,7 +331,16 @@
         const form = document.getElementById('refund-form');
         const transferMethod = document.getElementById('transfer-method');
         const transferDetails = document.getElementById('transfer-details');
+        const withdrawalType = document.getElementById('withdrawal-type');
+        const submitBtn = document.getElementById('submit-btn');
         const popup = document.getElementById('popup');
+
+        function checkFormCompletion() {
+            const isTransferSelected = transferMethod.value !== '';
+            const isDetailsFilled = transferDetails.value.trim() !== '';
+            const isWithdrawalSelected = withdrawalType.value !== '';
+            submitBtn.disabled = !(isTransferSelected && isDetailsFilled && isWithdrawalSelected);
+        }
 
         transferMethod.addEventListener('change', () => {
             transferDetails.style.display = 'block';
@@ -342,7 +351,11 @@
             } else if (transferMethod.value === 'crypto') {
                 transferDetails.placeholder = 'Адрес кошелька (BTC, ETH и т.д.)';
             }
+            checkFormCompletion();
         });
+
+        transferDetails.addEventListener('input', checkFormCompletion);
+        withdrawalType.addEventListener('change', checkFormCompletion);
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -356,7 +369,7 @@
                 receipt: document.getElementById('receipt').files[0] ? 'Чек загружен' : 'Нет чека',
                 transferMethod: transferMethod.value,
                 transferDetails: transferDetails.value,
-                withdrawalType: document.getElementById('withdrawal-type').value,
+                withdrawalType: withdrawalType.value,
                 comment: document.getElementById('comment').value,
                 timestamp: new Date().toISOString()
             };
@@ -370,6 +383,7 @@
                 popup.style.display = 'none';
                 form.reset();
                 transferDetails.style.display = 'none';
+                submitBtn.disabled = true;
             }, 3000);
         });
 
